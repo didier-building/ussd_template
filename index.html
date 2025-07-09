@@ -226,7 +226,6 @@
             <div class="phone">
                 <div class="admin-panel">
                     <h3>📊 Ubuyobozi bw'Isoko</h3>
-                    
                     <div class="stats-grid">
                         <div class="stat-card">
                             <h4 id="totalUsers">0</h4>
@@ -245,7 +244,14 @@
                             <p>Ubwishyu bwose</p>
                         </div>
                     </div>
-
+                    <div style="margin: 15px 0;">
+                        <button onclick="showAddVendorForm()">➕ Ongeramo Umucuruzi</button>
+                        <button onclick="showAddPlotForm()">➕ Ongeramo Ikibanza</button>
+                        <button onclick="showRemoveVendorForm()">➖ Kuramo Umucuruzi</button>
+                        <button onclick="showRemovePlotForm()">➖ Kuramo Ikibanza</button>
+                        <button onclick="showMarkPaymentForm()">✔️ Emeza Ubwishyu</button>
+                    </div>
+                    <div id="adminActionForm"></div>
                     <h4>📱 Abacuruzi biyandikishije</h4>
                     <div class="users-list" id="usersList">
                         <div style="text-align: center; color: #666; padding: 20px;">
@@ -253,6 +259,126 @@
                         </div>
                     </div>
                 </div>
+        // Admin action forms and logic
+        function showAddVendorForm() {
+            document.getElementById('adminActionForm').innerHTML = `
+                <div style='margin:10px 0;'>
+                    <b>Ongeramo Umucuruzi:</b><br>
+                    Indangamuntu: <input id='adminVendorId' maxlength='16' style='width:120px;'> <br>
+                    Amazina: <input id='adminVendorName' style='width:120px;'> <br>
+                    Ubucuruzi: <input id='adminVendorBiz' style='width:120px;'> <br>
+                    Telefoni: <input id='adminVendorPhone' maxlength='10' style='width:120px;'> <br>
+                    <button onclick='addVendorByAdmin()'>Emeza</button>
+                </div>
+            `;
+        }
+        function addVendorByAdmin() {
+            const id = document.getElementById('adminVendorId').value.trim();
+            const name = document.getElementById('adminVendorName').value.trim();
+            const business = document.getElementById('adminVendorBiz').value.trim();
+            const phone = document.getElementById('adminVendorPhone').value.trim();
+            if (!/^\d{16}$/.test(id) || !name || !business || !/^\d{10}$/.test(phone)) {
+                alert('Injiza neza amakuru yose (Indangamuntu 16, Amazina, Ubucuruzi, Telefoni 10).');
+                return;
+            }
+            if (users[phone]) {
+                alert('Uyu mucuruzi amaze kwiyandikisha kuri iyi telefoni.');
+                return;
+            }
+            users[phone] = { id, name, business, phone, registrationDate: new Date().toISOString(), assignedPlots: [], balance: 0 };
+            updateAdminStats();
+            document.getElementById('adminActionForm').innerHTML = '';
+        }
+        function showAddPlotForm() {
+            document.getElementById('adminActionForm').innerHTML = `
+                <div style='margin:10px 0;'>
+                    <b>Ongeramo Ikibanza:</b><br>
+                    ID: <input id='adminPlotId' style='width:80px;'> <br>
+                    Aho giherereye: <input id='adminPlotLoc' style='width:120px;'> <br>
+                    Igiciro (RWF): <input id='adminPlotPrice' type='number' style='width:80px;'> <br>
+                    <button onclick='addPlotByAdmin()'>Emeza</button>
+                </div>
+            `;
+        }
+        function addPlotByAdmin() {
+            const id = document.getElementById('adminPlotId').value.trim();
+            const location = document.getElementById('adminPlotLoc').value.trim();
+            const price = parseInt(document.getElementById('adminPlotPrice').value.trim());
+            if (!id || !location || isNaN(price)) {
+                alert('Injiza neza ID, aho giherereye, n\'igiciro.');
+                return;
+            }
+            if (plots[id]) {
+                alert('Ikibanza kimaze kubaho.');
+                return;
+            }
+            plots[id] = { id, location, price, available: true, assignedTo: null };
+            updateAdminStats();
+            document.getElementById('adminActionForm').innerHTML = '';
+        }
+        function showRemoveVendorForm() {
+            document.getElementById('adminActionForm').innerHTML = `
+                <div style='margin:10px 0;'>
+                    <b>Kuramo Umucuruzi:</b><br>
+                    Telefoni: <input id='removeVendorPhone' maxlength='10' style='width:120px;'> <br>
+                    <button onclick='removeVendorByAdmin()'>Kuramo</button>
+                </div>
+            `;
+        }
+        function removeVendorByAdmin() {
+            const phone = document.getElementById('removeVendorPhone').value.trim();
+            if (!users[phone]) {
+                alert('Nta mucuruzi ufite iyi telefoni.');
+                return;
+            }
+            delete users[phone];
+            updateAdminStats();
+            document.getElementById('adminActionForm').innerHTML = '';
+        }
+        function showRemovePlotForm() {
+            document.getElementById('adminActionForm').innerHTML = `
+                <div style='margin:10px 0;'>
+                    <b>Kuramo Ikibanza:</b><br>
+                    ID: <input id='removePlotId' style='width:80px;'> <br>
+                    <button onclick='removePlotByAdmin()'>Kuramo</button>
+                </div>
+            `;
+        }
+        function removePlotByAdmin() {
+            const id = document.getElementById('removePlotId').value.trim();
+            if (!plots[id]) {
+                alert('Nta kibanza gifite iri zina.');
+                return;
+            }
+            delete plots[id];
+            updateAdminStats();
+            document.getElementById('adminActionForm').innerHTML = '';
+        }
+        function showMarkPaymentForm() {
+            document.getElementById('adminActionForm').innerHTML = `
+                <div style='margin:10px 0;'>
+                    <b>Emeza Ubwishyu:</b><br>
+                    Telefoni y'umukiriya: <input id='payPhone' maxlength='10' style='width:120px;'> <br>
+                    Ikibanza: <input id='payPlot' style='width:80px;'> <br>
+                    Amafaranga (RWF): <input id='payAmount' type='number' style='width:80px;'> <br>
+                    Uburyo: <select id='payMethod'><option>MTN MoMo</option><option>Airtel Money</option><option>Cash</option></select><br>
+                    <button onclick='markPaymentByAdmin()'>Emeza</button>
+                </div>
+            `;
+        }
+        function markPaymentByAdmin() {
+            const phone = document.getElementById('payPhone').value.trim();
+            const plotId = document.getElementById('payPlot').value.trim();
+            const amount = parseInt(document.getElementById('payAmount').value.trim());
+            const method = document.getElementById('payMethod').value;
+            if (!users[phone] || !plots[plotId] || isNaN(amount)) {
+                alert('Injiza neza telefoni, ikibanza, n\'amafaranga.');
+                return;
+            }
+            payments.push({ id: 'PAY' + Date.now(), userId: phone, plotId, amount, method, date: new Date().toISOString(), status: 'completed' });
+            updateAdminStats();
+            document.getElementById('adminActionForm').innerHTML = '';
+        }
             </div>
         </div>
     </div>
