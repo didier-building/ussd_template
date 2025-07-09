@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rwanda Market Management USSD System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .phone-container {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .phone {
+            background: #1a1a1a;
+            border-radius: 25px;
+            padding: 20px;
+            width: 350px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .phone::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: #444;
+            border-radius: 2px;
+        }
+
+        .screen {
+            background: #000;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            min-height: 400px;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            overflow-y: auto;
+            border: 2px solid #333;
+        }
+
+        .input-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #333;
+            border-radius: 5px;
+            background: #2a2a2a;
+            color: white;
+            font-size: 16px;
+        }
+
+        .input-area button {
+            padding: 10px 20px;
+            background: #00ff00;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .input-area button:hover {
+            background: #00cc00;
+            transform: scale(1.05);
+        }
+
+        .admin-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .admin-panel h3 {
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card h4 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .users-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .user-item:last-child {
+            border-bottom: none;
+        }
+
+        .status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status.active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        @media (max-width: 768px) {
+            .phone-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .phone {
+                width: 100%;
+                max-width: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏪 Rwanda Market Management System</h1>
+            <p>USSD-based market plot management and payment system</p>
+        </div>
+
+        <div class="phone-container">
+            <div class="phone">
+                <div class="screen" id="screen">
+                    <div>Welcome to Rwanda Market Management System</div>
+                    <div>Type *789# to start</div>
+                    <div>═══════════════════════════════════════</div>
+                </div>
+                <div class="input-area">
+                    <input type="text" id="ussdInput" placeholder="Enter USSD command (e.g., *789#)" />
+                    <button onclick="sendUSSD()">Send</button>
+                </div>
+            </div>
+
+            <div class="phone">
+                <div class="admin-panel">
+                    <h3>📊 Admin Dashboard</h3>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h4 id="totalUsers">0</h4>
+                            <p>Total Vendors</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4 id="totalPlots">25</h4>
+                            <p>Total Plots</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4 id="occupiedPlots">0</h4>
+                            <p>Occupied Plots</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4 id="totalPayments">0</h4>
+                            <p>Total Payments</p>
+                        </div>
+                    </div>
+
+                    <h4>📱 Registered Vendors</h4>
+                    <div class="users-list" id="usersList">
+                        <div style="text-align: center; color: #666; padding: 20px;">
+                            No vendors registered yet
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Database simulation
+        let users = {};
+        let plots = {};
+        let payments = [];
+        let currentSession = {};
+
+        // Initialize plots
+        function initializePlots() {
+            for (let i = 1; i <= 25; i++) {
+                plots[`A${i.toString().padStart(2, '0')}`] = {
+                    id: `A${i.toString().padStart(2, '0')}`,
+                    location: `Sector ${Math.ceil(i/5)}, Row ${((i-1) % 5) + 1}`,
+                    price: 5000 + (i * 100), // Price in RWF
+                    available: true,
+                    assignedTo: null
+                };
+            }
+        }
+
+        // Initialize system
+        initializePlots();
+
+        function addToScreen(text) {
+            const screen = document.getElementById('screen');
+            screen.innerHTML += '<div>' + text + '</div>';
+            screen.scrollTop = screen.scrollHeight;
+        }
+
+        function clearScreen() {
+            const screen = document.getElementById('screen');
+            screen.innerHTML = '';
+        }
+
+        function sendUSSD() {
+            const input = document.getElementById('ussdInput');
+            const command = input.value.trim();
+            
+            if (!command) return;
+
+            addToScreen('> ' + command);
+            processUSSD(command);
+            input.value = '';
+        }
+
+        function processUSSD(command) {
+            const phoneNumber = extractPhoneNumber(command) || currentSession.phoneNumber || '0788123456';
+            // Always send input to handleTextInput if in a data entry state
+            if (currentSession.state === 'registration' ||
+                (currentSession.state && [
+                    'no_plots', 'user_plots', 'plot_info', 'payment_history', 'help'
+                ].includes(currentSession.state) && currentSession.waitingForBack !== undefined)
+            ) {
+                handleTextInput(command, phoneNumber);
+            } else if (command === '*789#') {
+                showMainMenu(phoneNumber);
+            } else if (command.match(/^\d+$/)) {
+                handleMenuSelection(command, phoneNumber);
+            } else if (command.startsWith('*789#')) {
+                showMainMenu(phoneNumber);
+            } else {
+                // Handle text input for registration and other text fields
+                handleTextInput(command, phoneNumber);
+            }
+        }
+
+        function extractPhoneNumber(command) {
+            // Simple extraction - in real implementation, this would come from telecom
+            return null;
+        }
+
+        function showMainMenu(phoneNumber) {
+            currentSession = { phoneNumber, state: 'main_menu' };
+            
+            clearScreen();
+            addToScreen('🏪 RWANDA MARKET MANAGEMENT');
+            addToScreen('═══════════════════════════════════════');
+            
+            if (users[phoneNumber]) {
+                addToScreen(`Welcome back, ${users[phoneNumber].name}!`);
+                addToScreen('');
+                addToScreen('1. My Account');
+                addToScreen('2. Make Payment');
+                addToScreen('3. Plot Information');
+                addToScreen('4. Payment History');
+                addToScreen('5. Help & Support');
+            } else {
+                addToScreen('Welcome! Please register first.');
+                addToScreen('');
+                addToScreen('1. Register as Vendor');
+                addToScreen('2. Plot Information');
+                addToScreen('3. Help & Support');
+            }
+            
+            addToScreen('');
+            addToScreen('Enter your choice:');
+        }
+
+        function handleTextInput(input, phoneNumber) {
+            if (currentSession.state === 'registration') {
+                handleRegistration(input, phoneNumber);
+            } else if (currentSession.state === 'plot_info' && currentSession.waitingForBack) {
+                if (input === '1') {
+                    showPlotInfo();
+                } else if (input === '2') {
+                    showMainMenu(phoneNumber);
+                } else {
+                    addToScreen('Invalid choice. Enter 1 or 2.');
+                }
+            } else if (currentSession.state === 'payment_history' && input === '1') {
+                showMainMenu(phoneNumber);
+            } else if (currentSession.state === 'help' && input === '1') {
+                showMainMenu(phoneNumber);
+            } else if (currentSession.state === 'no_plots') {
+                if (input === '1') {
+                    showAvailablePlots(phoneNumber, 'request');
+                } else if (input === '2') {
+                    showMyAccount(phoneNumber);
+                } else {
+                    addToScreen('Invalid choice. Enter 1 or 2.');
+                }
+            } else if (currentSession.state === 'user_plots') {
+                if (input === '1') {
+                    showPaymentMenu(phoneNumber);
+                } else if (input === '2') {
+                    showMyAccount(phoneNumber);
+                } else {
+                    addToScreen('Invalid choice. Enter 1 or 2.');
+                }
+            } else {
+                addToScreen('Invalid input. Please follow the menu options.');
+            }
+        }
+
+        function handleMenuSelection(choice, phoneNumber) {
+            const user = users[phoneNumber];
+            
+            if (!user && choice !== '1') {
+                if (choice === '2') {
+                    showPlotInfo();
+                } else if (choice === '3') {
+                    showHelp();
+                } else {
+                    addToScreen('Please register first (Option 1)');
+                }
+                return;
+            }
+
+            switch (currentSession.state) {
+                case 'main_menu':
+                    handleMainMenuChoice(choice, phoneNumber);
+                    break;
+                case 'my_account':
+                    handleAccountMenu(choice, phoneNumber);
+                    break;
+                case 'make_payment':
+                    handlePaymentMenu(choice, phoneNumber);
+                    break;
+                case 'plot_info':
+                    handlePlotInfoMenu(choice, phoneNumber);
+                    break;
+                case 'payment_method':
+                    handlePaymentMethod(choice, phoneNumber);
+                    break;
+                case 'plot_selection':
+                    handlePlotSelection(choice, phoneNumber);
+                    break;
+                default:
+                    showMainMenu(phoneNumber);
+            }
+        }
+
+        function handleMainMenuChoice(choice, phoneNumber) {
+            const user = users[phoneNumber];
+            
+            if (user) {
+                switch (choice) {
+                    case '1':
+                        showMyAccount(phoneNumber);
+                        break;
+                    case '2':
+                        showPaymentMenu(phoneNumber);
+                        break;
+                    case '3':
+                        showPlotInfo();
+                        break;
+                    case '4':
+                        showPaymentHistory(phoneNumber);
+                        break;
+                    case '5':
+                        showHelp();
+                        break;
+                    default:
+                        addToScreen('Invalid choice. Try again.');
+                }
+            } else {
+                switch (choice) {
+                    case '1':
+                        startRegistration(phoneNumber);
+                        break;
+                    case '2':
+                        showPlotInfo();
+                        break;
+                    case '3':
+                        showHelp();
+                        break;
+                    default:
+                        addToScreen('Invalid choice. Try again.');
+                }
+            }
+        }
+
+        function startRegistration(phoneNumber) {
+            currentSession.state = 'registration';
+            currentSession.step = 'id';
+            
+            clearScreen();
+            addToScreen('📝 VENDOR REGISTRATION');
+            addToScreen('═══════════════════════════════════════');
+            addToScreen('Please enter your National ID number:');
+        }
+
+        function handleRegistration(input, phoneNumber) {
+            input = (input || '').trim();
+            if (currentSession.step === 'id') {
+                // Remove all spaces and validate only digits
+                const cleanId = input.replace(/\s+/g, '');
+                if (!/^\d{16}$/.test(cleanId)) {
+                    addToScreen('Invalid ID. Please enter a valid 16-digit National ID number (digits only):');
+                    return;
+                }
+                // Check for duplicate ID (ignore spaces)
+                const duplicate = Object.values(users).find(u => (u.id || '').replace(/\s+/g, '') === cleanId);
+                if (duplicate) {
+                    addToScreen('This National ID is already registered. Please use a different ID or contact support.');
+                    return;
+                }
+                currentSession.tempUser = { id: cleanId };
+                currentSession.step = 'name';
+                addToScreen('');
+                addToScreen('Enter your full name:');
+            } else if (currentSession.step === 'name') {
+                if (!input) {
+                    addToScreen('Name cannot be empty. Please enter your full name:');
+                    return;
+                }
+                currentSession.tempUser.name = input;
+                currentSession.step = 'business';
+                addToScreen('');
+                addToScreen('Enter your business name:');
+            } else if (currentSession.step === 'business') {
+                if (!input) {
+                    addToScreen('Business name cannot be empty. Please enter your business name:');
+                    return;
+                }
+                currentSession.tempUser.business = input;
+                currentSession.step = 'confirm';
+                addToScreen('');
+                addToScreen('Registration Summary:');
+                addToScreen(`National ID: ${currentSession.tempUser.id}`);
+                addToScreen(`Name: ${currentSession.tempUser.name}`);
+                addToScreen(`Business: ${currentSession.tempUser.business}`);
+                addToScreen(`Phone: ${phoneNumber}`);
+                addToScreen('');
+                addToScreen('1. Confirm Registration');
+                addToScreen('2. Start Over');
+            } else if (currentSession.step === 'confirm') {
+                if (input === '1') {
+                    // Complete registration
+                    users[phoneNumber] = {
+                        ...currentSession.tempUser,
+                        phone: phoneNumber,
+                        registrationDate: new Date().toISOString(),
+                        assignedPlots: [],
+                        balance: 0
+                    };
+                    addToScreen('');
+                    addToScreen('✅ Registration successful!');
+                    addToScreen('Welcome to Rwanda Market Management!');
+                    addToScreen('');
+                    addToScreen('Returning to main menu...');
+                    updateAdminStats();
+                    setTimeout(() => {
+                        showMainMenu(phoneNumber);
+                    }, 2000);
+                } else if (input === '2') {
+                    // Reset temp data
+                    currentSession.tempUser = {};
+                    startRegistration(phoneNumber);
+                } else {
+                    addToScreen('Invalid choice. Enter 1 or 2.');
+                }
+            }
+        }
+
+        function showMyAccount(phoneNumber) {
+            currentSession.state = 'my_account';
+            const user = users[phoneNumber];
+            
+            clearScreen();
+            addToScreen('👤 MY ACCOUNT');
+            addToScreen('═══════════════════════════════════════');
+            addToScreen(`Name: ${user.name}`);
+            addToScreen(`Business: ${user.business}`);
+            addToScreen(`Phone: ${user.phone}`);
+            addToScreen(`Assigned Plots: ${user.assignedPlots.length}`);
+            addToScreen('');
+            addToScreen('1. View My Plots');
+            addToScreen('2. Request New Plot');
+            addToScreen('3. Update Profile');
+            addToScreen('4. Back to Main Menu');
+            addToScreen('');
+            addToScreen('Enter your choice:');
+        }
+
+        function handleAccountMenu(choice, phoneNumber) {
+            const user = users[phoneNumber];
+            
+            switch (choice) {
+                case '1':
+                    showUserPlots(phoneNumber);
+                    break;
+                case '2':
+                    showAvailablePlots(phoneNumber, 'request');
+                    break;
+                case '3':
+                    addToScreen('Profile update coming soon...');
+                    setTimeout(() => showMyAccount(phoneNumber), 2000);
+                    break;
+                case '4':
+                    showMainMenu(phoneNumber);
+                    break;
+                default:
+                    addToScreen('Invalid choice. Try again.');
+            }
+        }
+
+        function showUserPlots(phoneNumber) {
+            const user = users[phoneNumber];
+            
+            clearScreen();
+            addToScreen('🏪 MY PLOTS');
+            addToScreen('═══════════════════════════════════════');
+            
+            if (user.assignedPlots.length === 0) {
+                addToScreen('No plots assigned yet.');
+                addToScreen('');
+                addToScreen('1. Request a Plot');
+                addToScreen('2. Back to Account');
+                
+                currentSession.state = 'no_plots';
+            } else {
+                user.assignedPlots.forEach(plotId => {
+                    const plot = plots[plotId];
+                    addToScreen(`Plot ${plot.id} - ${plot.location}`);
+                    addToScreen(`Monthly Rent: ${plot.price} RWF`);
+                    addToScreen('---');
+                });
+                
+                addToScreen('');
+                addToScreen('1. Make Payment');
+                addToScreen('2. Back to Account');
+                
+                currentSession.state = 'user_plots';
+            }
+        }
+
+        function showPaymentMenu(phoneNumber) {
+            currentSession.state = 'make_payment';
+            const user = users[phoneNumber];
+            
+            clearScreen();
+            addToScreen('💳 MAKE PAYMENT');
+            addToScreen('═══════════════════════════════════════');
+            
+            if (user.assignedPlots.length === 0) {
+                addToScreen('No plots assigned for payment.');
+                addToScreen('Please request a plot first.');
+                setTimeout(() => showMainMenu(phoneNumber), 2000);
+                return;
+            }
+            
+            addToScreen('Select plot to pay for:');
+            user.assignedPlots.forEach((plotId, index) => {
+                const plot = plots[plotId];
+                addToScreen(`${index + 1}. ${plot.id} - ${plot.price} RWF`);
+            });
+            
+            addToScreen('');
+            addToScreen('Enter plot number:');
+        }
+
+        function handlePaymentMenu(choice, phoneNumber) {
+            const user = users[phoneNumber];
+            const plotIndex = parseInt(choice) - 1;
+            
+            if (plotIndex >= 0 && plotIndex < user.assignedPlots.length) {
+                const plotId = user.assignedPlots[plotIndex];
+                currentSession.selectedPlot = plotId;
+                showPaymentMethods(phoneNumber);
+            } else {
+                addToScreen('Invalid plot number. Try again.');
+            }
+        }
+
+        function showPaymentMethods(phoneNumber) {
+            currentSession.state = 'payment_method';
+            const plot = plots[currentSession.selectedPlot];
+            
+            clearScreen();
+            addToScreen('💳 PAYMENT METHOD');
+            addToScreen('═══════════════════════════════════════');
+            addToScreen(`Plot: ${plot.id}`);
+            addToScreen(`Amount: ${plot.price} RWF`);
+            addToScreen('');
+            addToScreen('Select payment method:');
+            addToScreen('1. MTN MoMo');
+            addToScreen('2. Airtel Money');
+            addToScreen('3. Cash (Pay at office)');
+            addToScreen('4. Back to Menu');
+            addToScreen('');
+            addToScreen('Enter your choice:');
+        }
+
+        function handlePaymentMethod(choice, phoneNumber) {
+            const plot = plots[currentSession.selectedPlot];
+            
+            switch (choice) {
+                case '1':
+                    processPayment(phoneNumber, 'MTN MoMo');
+                    break;
+                case '2':
+                    processPayment(phoneNumber, 'Airtel Money');
+                    break;
+                case '3':
+                    processPayment(phoneNumber, 'Cash');
+                    break;
+                case '4':
+                    showMainMenu(phoneNumber);
+                    break;
+                default:
+                    addToScreen('Invalid choice. Try again.');
+            }
+        }
+
+        function processPayment(phoneNumber, method) {
+            const user = users[phoneNumber];
+            const plot = plots[currentSession.selectedPlot];
+            
+            // Simulate payment processing
+            addToScreen('');
+            addToScreen('Processing payment...');
+            addToScreen('Please wait...');
+            
+            setTimeout(() => {
+                // Create payment record
+                const payment = {
+                    id: 'PAY' + Date.now(),
+                    userId: phoneNumber,
+                    plotId: plot.id,
+                    amount: plot.price,
+                    method: method,
+                    date: new Date().toISOString(),
+                    status: 'completed'
+                };
+                
+                payments.push(payment);
+                
+                addToScreen('');
+                addToScreen('✅ PAYMENT SUCCESSFUL!');
+                addToScreen('═══════════════════════════════════════');
+                addToScreen(`Receipt: ${payment.id}`);
+                addToScreen(`Plot: ${plot.id}`);
+                addToScreen(`Amount: ${plot.price} RWF`);
+                addToScreen(`Method: ${method}`);
+                addToScreen(`Date: ${new Date().toLocaleDateString()}`);
+                addToScreen('');
+                addToScreen('SMS receipt sent to your phone.');
+                addToScreen('');
+                addToScreen('Returning to main menu...');
+                
+                updateAdminStats();
+                
+                setTimeout(() => {
+                    showMainMenu(phoneNumber);
+                }, 3000);
+            }, 2000);
+        }
+
+        function showPlotInfo() {
+            currentSession.state = 'plot_info';
+            
+            clearScreen();
+            addToScreen('🏪 PLOT INFORMATION');
+            addToScreen('═══════════════════════════════════════');
+            addToScreen('1. View Available Plots');
+            addToScreen('2. View All Plots');
+            addToScreen('3. Search Plot by ID');
+            addToScreen('4. Back to Main Menu');
+            addToScreen('');
+            addToScreen('Enter your choice:');
+        }
+
+        function handlePlotInfoMenu(choice, phoneNumber) {
+            switch (choice) {
+                case '1':
+                    showAvailablePlots(phoneNumber, 'view');
+                    break;
+                case '2':
+                    showAllPlots();
+                    break;
+                case '3':
+                    addToScreen('Search feature coming soon...');
+                    setTimeout(() => showPlotInfo(), 2000);
+                    break;
+                case '4':
+                    showMainMenu(phoneNumber);
+                    break;
+                default:
+                    addToScreen('Invalid choice. Try again.');
+            }
+        }
+
+        function showAvailablePlots(phoneNumber, action) {
+            clearScreen();
+            addToScreen('🏪 AVAILABLE PLOTS');
+            addToScreen('═══════════════════════════════════════');
+            
+            const availablePlots = Object.values(plots).filter(plot => plot.available);
+            
+            if (availablePlots.length === 0) {
+                addToScreen('No plots available at the moment.');
+                addToScreen('');
+                addToScreen('1. Back to Main Menu');
+                return;
+            }
+            
+            availablePlots.forEach((plot, index) => {
+                addToScreen(`${index + 1}. ${plot.id} - ${plot.location}`);
+                addToScreen(`   Rent: ${plot.price} RWF/month`);
+                addToScreen('');
+            });
+            
+            if (action === 'request') {
+                addToScreen('Enter plot number to request:');
+                currentSession.state = 'plot_selection';
+                currentSession.availablePlots = availablePlots;
+            } else {
+                addToScreen('1. Back to Main Menu');
+            }
+        }
+
+        function handlePlotSelection(choice, phoneNumber) {
+            const plotIndex = parseInt(choice) - 1;
+            const user = users[phoneNumber];
+            
+            if (plotIndex >= 0 && plotIndex < currentSession.availablePlots.length) {
+                const selectedPlot = currentSession.availablePlots[plotIndex];
+                
+                // Assign plot to user
+                selectedPlot.available = false;
+                selectedPlot.assignedTo = phoneNumber;
+                user.assignedPlots.push(selectedPlot.id);
+                
+                addToScreen('');
+                addToScreen('✅ PLOT ASSIGNED SUCCESSFULLY!');
+                addToScreen(`Plot ${selectedPlot.id} has been assigned to you.`);
+                addToScreen(`Monthly rent: ${selectedPlot.price} RWF`);
+                addToScreen('');
+                addToScreen('You can now make payments for this plot.');
+                addToScreen('');
+                addToScreen('Returning to main menu...');
+                
+                updateAdminStats();
+                
+                setTimeout(() => {
+                    showMainMenu(phoneNumber);
+                }, 3000);
+            } else {
+                addToScreen('Invalid plot number. Try again.');
+            }
+        }
+
+        function showAllPlots() {
+            clearScreen();
+            addToScreen('🏪 ALL PLOTS');
+            addToScreen('═══════════════════════════════════════');
+            
+            Object.values(plots).forEach(plot => {
+                const status = plot.available ? 'Available' : 'Occupied';
+                addToScreen(`${plot.id} - ${plot.location}`);
+                addToScreen(`Status: ${status} | Rent: ${plot.price} RWF`);
+                addToScreen('---');
+            });
+            
+            addToScreen('');
+            addToScreen('1. Back to Plot Info');
+            addToScreen('2. Main Menu');
+            
+            currentSession.waitingForBack = true;
+        }
+
+        function showPaymentHistory(phoneNumber) {
+            clearScreen();
+            addToScreen('📋 PAYMENT HISTORY');
+            addToScreen('═══════════════════════════════════════');
+            
+            const userPayments = payments.filter(p => p.userId === phoneNumber);
+            
+            if (userPayments.length === 0) {
+                addToScreen('No payment history found.');
+            } else {
+                userPayments.forEach(payment => {
+                    addToScreen(`${payment.id}`);
+                    addToScreen(`Plot: ${payment.plotId}`);
+                    addToScreen(`Amount: ${payment.amount} RWF`);
+                    addToScreen(`Date: ${new Date(payment.date).toLocaleDateString()}`);
+                    addToScreen(`Method: ${payment.method}`);
+                    addToScreen('---');
+                });
+            }
+            
+            addToScreen('');
+            addToScreen('1. Back to Main Menu');
+            
+            currentSession.state = 'payment_history';
+        }
+
+        function showHelp() {
+            clearScreen();
+            addToScreen('❓ HELP & SUPPORT');
+            addToScreen('═══════════════════════════════════════');
+            addToScreen('Rwanda Market Management System');
+            addToScreen('');
+            addToScreen('How to use:');
+            addToScreen('• Dial *789# to access the system');
+            addToScreen('• Register as a vendor first');
+            addToScreen('• Request and pay for plots');
+            addToScreen('• View payment history');
+            addToScreen('');
+            addToScreen('Payment Methods:');
+            addToScreen('• MTN MoMo');
+            addToScreen('• Airtel Money');
+            addToScreen('• Cash at market office');
+            addToScreen('');
+            addToScreen('For support: Call 0788-XXX-XXX');
+            addToScreen('');
+            addToScreen('1. Back to Main Menu');
+            
+            currentSession.state = 'help';
+        }
+
+        function updateAdminStats() {
+            document.getElementById('totalUsers').textContent = Object.keys(users).length;
+            document.getElementById('occupiedPlots').textContent = Object.values(plots).filter(p => !p.available).length;
+            document.getElementById('totalPayments').textContent = payments.length;
+            
+            // Update users list
+            const usersList = document.getElementById('usersList');
+            if (Object.keys(users).length === 0) {
+                usersList.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">No vendors registered yet</div>';
+            } else {
+                usersList.innerHTML = Object.values(users).map(user => `
+                    <div class="user-item">
+                        <div>
+                            <strong>${user.name}</strong><br>
+                            <small>${user.business} - ${user.phone}</small>
+                        </div>
+                        <span class="status active">Active</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Allow Enter key to send USSD
+        document.getElementById('ussdInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendUSSD();
+            }
+        });
+
+        // Initialize admin stats
+        updateAdminStats();
+    </script>
+</body>
+</html>
