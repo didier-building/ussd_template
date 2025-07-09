@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rwanda Market Management USSD System</title>
+    <title>Sisteme ya USSD yo Gucunga Isoko</title>
     <style>
         * {
             margin: 0;
@@ -206,50 +206,50 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🏪 Rwanda Market Management System</h1>
-            <p>USSD-based market plot management and payment system</p>
+            <h1>🏪 Sisteme yo Gucunga Isoko rya Rwanda</h1>
+            <p>Sisteme ya USSD yo gucunga no kwishyura ibibanza by'isoko</p>
         </div>
 
         <div class="phone-container">
             <div class="phone">
                 <div class="screen" id="screen">
-                    <div>Welcome to Rwanda Market Management System</div>
-                    <div>Type *789# to start</div>
+                    <div>Murakaza neza kuri Sisteme yo Gucunga Isoko rya Rwanda</div>
+                    <div>Andika *789# utangire</div>
                     <div>═══════════════════════════════════════</div>
                 </div>
                 <div class="input-area">
-                    <input type="text" id="ussdInput" placeholder="Enter USSD command (e.g., *789#)" />
-                    <button onclick="sendUSSD()">Send</button>
+            <input type="text" id="ussdInput" placeholder="Andika kode ya USSD (nko kuri *789#)" />
+            <button onclick="sendUSSD()">Ohereza</button>
                 </div>
             </div>
 
             <div class="phone">
                 <div class="admin-panel">
-                    <h3>📊 Admin Dashboard</h3>
+                    <h3>📊 Ubuyobozi bw'Isoko</h3>
                     
                     <div class="stats-grid">
                         <div class="stat-card">
                             <h4 id="totalUsers">0</h4>
-                            <p>Total Vendors</p>
+                            <p>Abacuruzi Bose</p>
                         </div>
                         <div class="stat-card">
                             <h4 id="totalPlots">25</h4>
-                            <p>Total Plots</p>
+                            <p>Ibibanza Byose</p>
                         </div>
                         <div class="stat-card">
                             <h4 id="occupiedPlots">0</h4>
-                            <p>Occupied Plots</p>
+                            <p>Ibibanza byamaze gufatwa</p>
                         </div>
                         <div class="stat-card">
                             <h4 id="totalPayments">0</h4>
-                            <p>Total Payments</p>
+                            <p>Ubwishyu bwose</p>
                         </div>
                     </div>
 
-                    <h4>📱 Registered Vendors</h4>
+                    <h4>📱 Abacuruzi biyandikishije</h4>
                     <div class="users-list" id="usersList">
                         <div style="text-align: center; color: #666; padding: 20px;">
-                            No vendors registered yet
+                            Nta mucuruzi uriyandikisha
                         </div>
                     </div>
                 </div>
@@ -332,27 +332,27 @@
             currentSession = { phoneNumber, state: 'main_menu' };
             
             clearScreen();
-            addToScreen('🏪 RWANDA MARKET MANAGEMENT');
+            addToScreen('🏪 SISTEME YO GUCUNGA ISOKO');
             addToScreen('═══════════════════════════════════════');
             
             if (users[phoneNumber]) {
-                addToScreen(`Welcome back, ${users[phoneNumber].name}!`);
+                addToScreen(`Murakaza neza, ${users[phoneNumber].name}!`);
                 addToScreen('');
-                addToScreen('1. My Account');
-                addToScreen('2. Make Payment');
-                addToScreen('3. Plot Information');
-                addToScreen('4. Payment History');
-                addToScreen('5. Help & Support');
+                addToScreen('1. Konti Yanjye');
+                addToScreen('2. Kwishyura');
+                addToScreen('3. Amakuru y\'ibibanza');
+                addToScreen('4. Amateka y\'ubwishyu');
+                addToScreen('5. Ubufasha & Inkunga');
             } else {
-                addToScreen('Welcome! Please register first.');
+                addToScreen('Murakaza neza! Banza wiyandikishe.');
                 addToScreen('');
-                addToScreen('1. Register as Vendor');
-                addToScreen('2. Plot Information');
-                addToScreen('3. Help & Support');
+                addToScreen('1. Kwiyandikisha nk\'umucuruzi');
+                addToScreen('2. Amakuru y\'ibibanza');
+                addToScreen('3. Ubufasha & Inkunga');
             }
             
             addToScreen('');
-            addToScreen('Enter your choice:');
+            addToScreen('Andika umubare uhitamo:');
         }
 
         function handleTextInput(input, phoneNumber) {
@@ -474,9 +474,9 @@
             currentSession.step = 'id';
             
             clearScreen();
-            addToScreen('📝 VENDOR REGISTRATION');
+            addToScreen('📝 KWANDIKISHA UMUCURUZI');
             addToScreen('═══════════════════════════════════════');
-            addToScreen('Please enter your National ID number:');
+            addToScreen('Andika nimero yawe y\'Indangamuntu:');
         }
 
         function handleRegistration(input, phoneNumber) {
@@ -485,44 +485,44 @@
                 // Remove all spaces and validate only digits
                 const cleanId = input.replace(/\s+/g, '');
                 if (!/^\d{16}$/.test(cleanId)) {
-                    addToScreen('Invalid ID. Please enter a valid 16-digit National ID number (digits only):');
+                    addToScreen('Indangamuntu itariyo. Andika nimero 16 z\'Indangamuntu (imibare gusa):');
                     return;
                 }
                 // Check for duplicate ID (ignore spaces)
                 const duplicate = Object.values(users).find(u => (u.id || '').replace(/\s+/g, '') === cleanId);
                 if (duplicate) {
-                    addToScreen('This National ID is already registered. Please use a different ID or contact support.');
+                    addToScreen('Iyi nimero y\'Indangamuntu imaze kwiyandikisha. Koresha indi cyangwa hamagara ubufasha.');
                     return;
                 }
                 currentSession.tempUser = { id: cleanId };
                 currentSession.step = 'name';
                 addToScreen('');
-                addToScreen('Enter your full name:');
+                addToScreen('Andika amazina yawe yose:');
             } else if (currentSession.step === 'name') {
                 if (!input) {
-                    addToScreen('Name cannot be empty. Please enter your full name:');
+                    addToScreen('Amazina ntashobora gusigara. Andika amazina yawe yose:');
                     return;
                 }
                 currentSession.tempUser.name = input;
                 currentSession.step = 'business';
                 addToScreen('');
-                addToScreen('Enter your business name:');
+                addToScreen('Andika izina ry\'ubucuruzi bwawe:');
             } else if (currentSession.step === 'business') {
                 if (!input) {
-                    addToScreen('Business name cannot be empty. Please enter your business name:');
+                    addToScreen('Izina ry\'ubucuruzi ntirishobora gusigara. Andika izina ry\'ubucuruzi bwawe:');
                     return;
                 }
                 currentSession.tempUser.business = input;
                 currentSession.step = 'confirm';
                 addToScreen('');
-                addToScreen('Registration Summary:');
-                addToScreen(`National ID: ${currentSession.tempUser.id}`);
-                addToScreen(`Name: ${currentSession.tempUser.name}`);
-                addToScreen(`Business: ${currentSession.tempUser.business}`);
-                addToScreen(`Phone: ${phoneNumber}`);
+                addToScreen('Incamake y\'iyandikwa:');
+                addToScreen(`Indangamuntu: ${currentSession.tempUser.id}`);
+                addToScreen(`Amazina: ${currentSession.tempUser.name}`);
+                addToScreen(`Ubucuruzi: ${currentSession.tempUser.business}`);
+                addToScreen(`Telefoni: ${phoneNumber}`);
                 addToScreen('');
-                addToScreen('1. Confirm Registration');
-                addToScreen('2. Start Over');
+                addToScreen('1. Emeza Iyandikwa');
+                addToScreen('2. Tangira bushya');
             } else if (currentSession.step === 'confirm') {
                 if (input === '1') {
                     // Complete registration
@@ -534,10 +534,10 @@
                         balance: 0
                     };
                     addToScreen('');
-                    addToScreen('✅ Registration successful!');
-                    addToScreen('Welcome to Rwanda Market Management!');
+                    addToScreen('✅ Kwiyandikisha byagenze neza!');
+                    addToScreen('Murakaza neza kuri Sisteme yo Gucunga Isoko!');
                     addToScreen('');
-                    addToScreen('Returning to main menu...');
+                    addToScreen('Ugaruka ku rubuga rw\'ibanze...');
                     updateAdminStats();
                     setTimeout(() => {
                         showMainMenu(phoneNumber);
@@ -547,7 +547,7 @@
                     currentSession.tempUser = {};
                     startRegistration(phoneNumber);
                 } else {
-                    addToScreen('Invalid choice. Enter 1 or 2.');
+                    addToScreen('Hitamo 1 cyangwa 2.');
                 }
             }
         }
@@ -557,19 +557,19 @@
             const user = users[phoneNumber];
             
             clearScreen();
-            addToScreen('👤 MY ACCOUNT');
+            addToScreen('👤 KONTI YANJYE');
             addToScreen('═══════════════════════════════════════');
-            addToScreen(`Name: ${user.name}`);
-            addToScreen(`Business: ${user.business}`);
-            addToScreen(`Phone: ${user.phone}`);
-            addToScreen(`Assigned Plots: ${user.assignedPlots.length}`);
+            addToScreen(`Amazina: ${user.name}`);
+            addToScreen(`Ubucuruzi: ${user.business}`);
+            addToScreen(`Telefoni: ${user.phone}`);
+            addToScreen(`Ibibanza: ${user.assignedPlots.length}`);
             addToScreen('');
-            addToScreen('1. View My Plots');
-            addToScreen('2. Request New Plot');
-            addToScreen('3. Update Profile');
-            addToScreen('4. Back to Main Menu');
+            addToScreen('1. Reba ibibanza byanjye');
+            addToScreen('2. Saba ikibanza gishya');
+            addToScreen('3. Hindura amakuru');
+            addToScreen('4. Subira ku rubuga rw\'ibanze');
             addToScreen('');
-            addToScreen('Enter your choice:');
+            addToScreen('Andika umubare uhitamo:');
         }
 
         function handleAccountMenu(choice, phoneNumber) {
@@ -598,27 +598,27 @@
             const user = users[phoneNumber];
             
             clearScreen();
-            addToScreen('🏪 MY PLOTS');
+            addToScreen('🏪 IBIBANZA BYANJYE');
             addToScreen('═══════════════════════════════════════');
             
             if (user.assignedPlots.length === 0) {
-                addToScreen('No plots assigned yet.');
+                addToScreen('Nta kibanza urahabwa.');
                 addToScreen('');
-                addToScreen('1. Request a Plot');
-                addToScreen('2. Back to Account');
+                addToScreen('1. Saba ikibanza');
+                addToScreen('2. Subira kuri konti');
                 
                 currentSession.state = 'no_plots';
             } else {
                 user.assignedPlots.forEach(plotId => {
                     const plot = plots[plotId];
-                    addToScreen(`Plot ${plot.id} - ${plot.location}`);
-                    addToScreen(`Monthly Rent: ${plot.price} RWF`);
+                    addToScreen(`Ikibanza ${plot.id} - ${plot.location}`);
+                    addToScreen(`Ubukode bw\'ukwezi: ${plot.price} RWF`);
                     addToScreen('---');
                 });
                 
                 addToScreen('');
-                addToScreen('1. Make Payment');
-                addToScreen('2. Back to Account');
+                addToScreen('1. Kwishyura');
+                addToScreen('2. Subira kuri konti');
                 
                 currentSession.state = 'user_plots';
             }
