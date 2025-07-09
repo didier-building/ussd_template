@@ -401,23 +401,35 @@
                 handleRegistration(input, phoneNumber);
             } else if (currentSession.state === 'plot_info' && currentSession.waitingForBack) {
                 if (input === '1') {
-                    showPlotInfo();
+                    // Back to Plot Info
+                    showPlotInfo(phoneNumber);
+                    currentSession.waitingForBack = false;
                 } else if (input === '2') {
+                    // Back to Main Menu
+                    showMainMenu(phoneNumber);
+                    currentSession.waitingForBack = false;
+                } else {
+                    addToScreen('Hitamo 1 cyangwa 2.');
+                }
+            } else if (currentSession.state === 'payment_history') {
+                if (input === '1') {
                     showMainMenu(phoneNumber);
                 } else {
-                    addToScreen('Invalid choice. Enter 1 or 2.');
+                    addToScreen('Hitamo 1.');
                 }
-            } else if (currentSession.state === 'payment_history' && input === '1') {
-                showMainMenu(phoneNumber);
-            } else if (currentSession.state === 'help' && input === '1') {
-                showMainMenu(phoneNumber);
+            } else if (currentSession.state === 'help') {
+                if (input === '1') {
+                    showMainMenu(phoneNumber);
+                } else {
+                    addToScreen('Hitamo 1.');
+                }
             } else if (currentSession.state === 'no_plots') {
                 if (input === '1') {
                     showAvailablePlots(phoneNumber, 'request');
                 } else if (input === '2') {
                     showMyAccount(phoneNumber);
                 } else {
-                    addToScreen('Invalid choice. Enter 1 or 2.');
+                    addToScreen('Hitamo 1 cyangwa 2.');
                 }
             } else if (currentSession.state === 'user_plots') {
                 if (input === '1') {
@@ -425,10 +437,15 @@
                 } else if (input === '2') {
                     showMyAccount(phoneNumber);
                 } else {
-                    addToScreen('Invalid choice. Enter 1 or 2.');
+                    addToScreen('Hitamo 1 cyangwa 2.');
                 }
             } else {
-                addToScreen('Invalid input. Please follow the menu options.');
+                // If in a menu state, try to handle as menu selection
+                if (currentSession.state && currentSession.state.endsWith('_menu')) {
+                    handleMenuSelection(input, phoneNumber);
+                } else {
+                    addToScreen('Injiza umubare uhuye n\'amabwiriza.');
+                }
             }
         }
 
